@@ -40,7 +40,13 @@ const jobSchema = new mongoose.Schema({
      type:mongoose.Schema.Types.ObjectId,
             ref:"job",
             required:true 
+ },
+ city_id:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"city",
+    required:true 
  }
+ 
 },{
     versionKey:false,
     timestamps:true
@@ -208,10 +214,10 @@ app.post("/city",async (req,res)=>{
    }
 })
 
-app.get("/city/:id",async(req,res)=>{
+app.get("/job/:id/skill/id2",async(req,res)=>{
     try{
-        const city = await City.findById(req.params.id).populate("job_ids").lean().exec()
-        return res.send({city})
+        const job = await Job.find({skill_id: {$eq:req.params.id}},{city_id: {$eq:req.params.id2}})
+        return res.status(201).send(job)
     }
    catch(e){
        return res.status(500),json({message:e.message,status:"failed"})
