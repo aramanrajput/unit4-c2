@@ -16,6 +16,7 @@ const companySchema = new mongoose.Schema({
     city:{type:String,required:true},
     phn_no:{type:Number,required:true},
     jobs:{type:Number,required:true},
+    
     job_ids:[
         {
             type:mongoose.Schema.Types.ObjectId,
@@ -33,8 +34,13 @@ const Company = mongoose.model("company",companySchema)
 
 const jobSchema = new mongoose.Schema({
     title:{type:String,required:true},
- rating:{type:Number,required:true}
-
+ rating:{type:Number,required:true},
+ noticeperiod:{type:Number,required:true},
+ skill_id:{
+     type:mongoose.Schema.Types.ObjectId,
+            ref:"job",
+            required:true 
+ }
 },{
     versionKey:false,
     timestamps:true
@@ -126,6 +132,17 @@ app.get("/jobs/rating",async(req,res)=>{
    } 
 })
 
+// find all the jobs that will accept a notice period of 2 months.
+app.get("/jobs/noticeperiod",async(req,res)=>{
+    try{
+        const jobs = await Job.find({noticeperiod: {$eq:2}}).lean().exec()
+        return res.send({jobs})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
+})
+
 
 app.post("/company",async (req,res)=>{
 
@@ -189,6 +206,16 @@ app.post("/city",async (req,res)=>{
    catch(e){
        return res.status(500),json({message:e.message,status:"failed"})
    }
+})
+
+app.get("/city/:id",async(req,res)=>{
+    try{
+        const city = await City.findById(req.params.id).populate("job_ids").lean().exec()
+        return res.send({city})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
 })
 
 app.post("/wfh",async (req,res)=>{
