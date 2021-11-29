@@ -15,7 +15,7 @@ const companySchema = new mongoose.Schema({
     name:{type:String, required :true},
     city:{type:String,required:true},
     phn_no:{type:Number,required:true},
-    
+    jobs:{type:Number,required:true},
     job_ids:[
         {
             type:mongoose.Schema.Types.ObjectId,
@@ -44,7 +44,7 @@ const Job = new mongoose.model("job",jobSchema)
 
 const citySchema = new mongoose.Schema({
     name:{type:String,required:true},
-    numberofjobs:{type:Number},
+    
     job_ids:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"job",
@@ -115,6 +115,17 @@ app.get("/jobs",async(req,res)=>{
    } 
 })
 
+// find all jobs by sorting the jobs as per their rating.
+app.get("/jobs/rating",async(req,res)=>{
+    try{
+        const jobs = await Job.find({}).sort({rating:1}).lean().exec()
+        return res.send({jobs})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
+})
+
 
 app.post("/company",async (req,res)=>{
 
@@ -127,6 +138,7 @@ app.post("/company",async (req,res)=>{
    }
 })
 
+
 app.get("/company",async(req,res)=>{
     try{
         const companies = await Company.find().lean().exec()
@@ -137,6 +149,69 @@ app.get("/company",async(req,res)=>{
    } 
 })
 
+app.get("/company/:id",async(req,res)=>{
+    try{
+        const Company = await Company.findById(req.params.id).lean().exec()
+        return res.send({company})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
+})
+
+// an api to get details of the company.
+app.patch("/company/:id",async(req,res)=>{
+    try{
+        const company = await Company.findById(req.params.id).lean().exec()
+        return res.send({company})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
+})
+
+app.post("/skill",async (req,res)=>{
+
+    try{
+        const skill = await Skill.create(req.body)
+        return res.status(201).send(skill)
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   }
+})
+app.post("/city",async (req,res)=>{
+
+    try{
+        const city = await City.create(req.body)
+        return res.status(201).send(city)
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   }
+})
+
+app.post("/wfh",async (req,res)=>{
+
+    try{
+        const wfh = await WorkFromHOme.create(req.body)
+        return res.status(201).send(wfh)
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   }
+})
+
+// find all the jobs that are available as Work from home.
+app.get("/wfh",async(req,res)=>{
+    try{
+        const wfh = await WorkFromHOme.find().populate("job_ids").lean().exec()
+        return res.send({wfh})
+    }
+   catch(e){
+       return res.status(500),json({message:e.message,status:"failed"})
+   } 
+})
 
 app.listen(2340,async ()=>{
     await connect()
